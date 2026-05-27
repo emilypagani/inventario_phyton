@@ -76,7 +76,39 @@ def pegar_usuario():
     usuario = os.getlogin()
     return usuario
 
-def gerar_html(hostname, usuario, sistema, versao, cpu, gpu, ram_gb, lista_discos):
+def montar_inventario():
+    
+    hostname = pegar_hostname()
+    usuario = pegar_usuario()
+    ip = pegar_ip(hostname)
+
+    sistema = pegar_sistemaop()
+    versao = pegar_versaosistema()
+
+    cpu = pegar_cpu()
+    gpu = pegar_gpu()
+
+    ram_gb = pegar_memoriaram()
+
+    lista_discos = pegar_discos()
+    
+    inventario = {
+        'hostname' : hostname,
+        'usuario' : usuario,
+        'ip' : ip,
+        
+        'sistema' : sistema,
+        'versao' : versao,
+        
+        'cpu' : cpu,
+        'gpu' : gpu,
+        
+        'ram_gb' : ram_gb,
+        'lista_discos' : lista_discos        
+    }
+    return inventario
+
+def gerar_html(hostname, usuario, ip, sistema, versao, cpu, gpu, ram_gb, lista_discos):
     html = f"""
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -124,6 +156,7 @@ def gerar_html(hostname, usuario, sistema, versao, cpu, gpu, ram_gb, lista_disco
 
         <p><strong>Hostname:</strong> {hostname}</p>
         <p><strong>Usuário:</strong> {usuario}</p>
+        <p><strong>IP:</strong> {ip}</p>
         <p><strong>Sistema:</strong> {sistema} {versao}</p>
     </div>
 
@@ -143,30 +176,19 @@ def gerar_html(hostname, usuario, sistema, versao, cpu, gpu, ram_gb, lista_disco
     return html
 
 def main():
-
-    hostname = pegar_hostname()
-    usuario = pegar_usuario()
-    ip = pegar_ip(hostname)
-
-    sistema = pegar_sistemaop()
-    versao = pegar_versaosistema()
-
-    cpu = pegar_cpu()
-    gpu = pegar_gpu()
-
-    ram_gb = pegar_memoriaram()
-
-    lista_discos = pegar_discos()
-
+    
+    inventario = montar_inventario()
+    
     html = gerar_html(
-    hostname,
-    usuario,
-    sistema,
-    versao,
-    cpu,
-    gpu,
-    ram_gb,
-    lista_discos
+    inventario['hostname'],
+    inventario['usuario'],
+    inventario['ip'],
+    inventario['sistema'],
+    inventario['versao'],
+    inventario['cpu'],
+    inventario['gpu'],
+    inventario['ram_gb'],
+    inventario['lista_discos']
 )
 
     with open("inventario.html", "w", encoding="utf-8") as arquivo:
@@ -175,16 +197,17 @@ def main():
     os.startfile("inventario.html")
 
     print('Diagnóstico de Configurações: \n')
-    print(f'Nome da Máquinas: {hostname} \n')
-    print(f'Usuário Conectado: {usuario} \n')
-    print(f'IP: {ip} \n')
-    print(f'Sistema Operacional: {sistema} {versao} \n')
-    print(f'CPU: {cpu} \n')
-    print(f'GPU: {gpu} \n')
-    print(f'Memória RAM: {ram_gb:.2f} GB \n')
+    print(f'Nome da Máquinas: {inventario ['hostname']} \n')
+    print(f'Usuário Conectado: {inventario ['usuario']} \n')
+    print(f'IP: {inventario ['ip']} \n')
+    print(f'Sistema Operacional: {inventario ['sistema']} {inventario ['versao']} \n')
+    print(f'CPU: {inventario ['cpu']} \n')
+    print(f'GPU: {inventario ['gpu']} \n')
+    print(f'Memória RAM: {inventario ['ram_gb']:.2f} GB \n')
     print(f'Discos:')
-    for disco in lista_discos:
+    for disco in inventario["lista_discos"]:
         print(f'{disco['nome']} ({disco['tipo']})')
         print(f'Total: {disco['tamanho']:.2f} GB \n')
+        
 if __name__ == "__main__":
     main()

@@ -1,0 +1,10 @@
+__pycache__/
+
+*.db
+*.json
+*.html
+
+build/
+dist/
+
+*.spec

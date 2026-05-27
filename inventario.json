@@ -1,0 +1,27 @@
+{
+    "data_coleta": "27/05/2026 15:50",
+    "hostname": "DESKTOP-O0JC29M",
+    "usuario": "emily",
+    "ip": "192.168.7.15",
+    "sistema": "Windows",
+    "versao": "11",
+    "cpu": "AMD Ryzen 3 3300X 4-Core Processor",
+    "gpu": "Radeon RX 5500 XT",
+    "ram_gb": 15.9329833984375,
+    "lista_discos": [
+        {
+            "unidade": "C:",
+            "tamanho": 446.04649353027344,
+            "livre": 209.76127243041992,
+            "usado": 236.28522109985352,
+            "percentual_usado": 52.97322690057571
+        },
+        {
+            "unidade": "D:",
+            "tamanho": 931.5107383728027,
+            "livre": 208.06467056274414,
+            "usado": 723.4460678100586,
+            "percentual_usado": 77.663738914465
+        }
+    ]
+}

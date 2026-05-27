@@ -4,26 +4,56 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Inventário do Sistemas</title>
+    <title>Inventário do Sistema</title>
 
     <style>
-
         body {
             background-color: #0f172a;
             color: white;
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
         }
 
         h1 {
             color: #38bdf8;
+            margin-bottom: 5px;
+        }
+
+        .subtitulo {
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+        
+        <p class="subtitulo">Coleta realizada em 27/05/2026 15:50</p>
+
+        button {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
         }
 
         .card {
             background-color: #1e293b;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 16px;
             margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
         }
 
         .titulo {
@@ -32,29 +62,164 @@
             margin-bottom: 10px;
         }
 
+        p {
+            color: #e2e8f0;
+            line-height: 1.5;
+        }
+
+        strong {
+            color: #f8fafc;
+        }
+
+        .barra {
+            width: 100%;
+            height: 12px;
+            background-color: #334155;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .barra-uso {
+            height: 100%;
+            background-color: #38bdf8;
+        }
+        
+        button {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #0ea5e9;
+        }
+
+        #ultima-atualizacao {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .botao-atualizar {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            transition: 0.5s;
+        }
+
+        .botao-atualizar:hover {
+            background-color: #0ea5e9;
+            transform: rotate(180deg);
+        }
     </style>
 
 </head>
 
+<script>
+    function atualizarPagina() {
+        location.reload();
+    }
+
+    const agora = new Date();
+
+    document.getElementById("ultima-atualizacao").innerText =
+        "Página carregada em: " + agora.toLocaleString("pt-BR");
+</script>
+
 <body>
 
-    <h1>Inventário do Sistemas</h1>
+    <div class="container">
 
-    <div class="card">
-        <div class="titulo">Computador</div>
+        <div class="topo">
 
-        <p><strong>Hostname:</strong> DESKTOP-O0JC29M</p>
-        <p><strong>Usuário:</strong> emily</p>
-        <p><strong>IP:</strong> 192.168.7.15</p>
-        <p><strong>Sistema:</strong> Windows 11</p>
+    <div>
+        <h1>Inventário do Sistema</h1>
+        <p class="subtitulo">
+            Coleta realizada em 27/05/2026 15:50
+        </p>
     </div>
 
-    <div class="card">
-        <div class="titulo">Hardware</div>
+    <button
+        class="botao-atualizar"
+        onclick="atualizarPagina()">
 
-        <p><strong>CPU:</strong> AMD Ryzen 3 3300X 4-Core Processor</p>
-        <p><strong>RAM:</strong> 15.93 GB</p>
-        <p><strong>GPU:</strong> Radeon RX 5500 XT</p>
+        ↻
+
+    </button>
+
+</div>
+
+<p id="ultima-atualizacao"></p>
+
+        <div class="grid">
+
+            <div class="card">
+                <div class="titulo">🖥️ Computador</div>
+
+                <p><strong>Hostname:</strong> DESKTOP-O0JC29M</p>
+                <p><strong>Usuário:</strong> emily</p>
+                <p><strong>IP:</strong> 192.168.7.15</p>
+                <p><strong>Sistema:</strong> Windows 11</p>
+            </div>
+
+            <div class="card">
+                <div class="titulo">⚙️ Hardware</div>
+
+                <p><strong>CPU:</strong> AMD Ryzen 3 3300X 4-Core Processor</p>
+                <p><strong>GPU:</strong> Radeon RX 5500 XT</p>
+                <p><strong>Memória RAM:</strong> 15.93 GB</p>
+            </div>
+
+        </div>
+
+        <h2>Discos</h2>
+
+        <div class="grid">
+            
+        <div class="card">
+        <div class="titulo">💾 Disco C:</div>
+            <p><strong>Total:</strong> 446.05 GB</p>
+            <p><strong>Usado:</strong> 236.29 GB</p>
+            <p><strong>Livre:</strong> 209.76 GB</p>
+            <p><strong>Uso:</strong> 52.97%</p>
+
+            <div class="barra">
+                <div class="barra-uso" style="width: 52.97%;"></div>
+            </div>
+        </div>
+        
+        <div class="card">
+        <div class="titulo">💾 Disco D:</div>
+            <p><strong>Total:</strong> 931.51 GB</p>
+            <p><strong>Usado:</strong> 723.45 GB</p>
+            <p><strong>Livre:</strong> 208.06 GB</p>
+            <p><strong>Uso:</strong> 77.66%</p>
+
+            <div class="barra">
+                <div class="barra-uso" style="width: 77.66%;"></div>
+            </div>
+        </div>
+        
+        </div>
+
     </div>
 
 </body>

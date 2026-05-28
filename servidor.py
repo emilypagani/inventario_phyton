@@ -1,8 +1,19 @@
 from fastapi import FastAPI
+from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
+
 import sqlite3
 import json
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 conn = sqlite3.connect(
     "inventario.db",
@@ -98,35 +109,9 @@ def receber_inventario(inventario: dict):
     }
 
 
-@app.get("/maquinas")
-def listar_maquinas():
-
-    cursor.execute(
-        """
-        SELECT
-            hostname,
-            MAX(data_coleta)
-        FROM inventarios
-        GROUP BY hostname
-        """
-    )
-
-    dados = cursor.fetchall()
-
-    maquinas = []
-
-    for item in dados:
-        maquina = {
-            "hostname": item[0],
-            "ultima_coleta": item[1]
-        }
-
-        maquinas.append(maquina)
-
-    return maquinas
-
 @app.get("/maquinas/{hostname}")
 def buscar_maquina(hostname: str):
+
     cursor.execute(
         """
         SELECT dados
@@ -141,6 +126,47 @@ def buscar_maquina(hostname: str):
     resultado = cursor.fetchone()
 
     if resultado:
-        return json.loads(resultado[0])
+
+        inventario = json.loads(resultado[0])
+
+        data_ultima_coleta = datetime.fromisoformat(
+            inventario["data_coleta"]
+        )
+
+        agora = datetime.now()
+
+        diferenca = agora - data_ultima_coleta
+
+        segundos_offline = diferenca.total_seconds()
+
+        if segundos_offline <= 300:
+
+            inventario["status"] = "ONLINE"
+
+        else:
+
+            minutos = int(segundos_offline // 60)
+            horas = int(minutos // 60)
+            dias = int(horas // 24)
+
+            if dias >= 1:
+
+                inventario["status"] = (
+                    f"OFFLINE há {dias} dia(s)"
+                )
+
+            elif horas >= 1:
+
+                inventario["status"] = (
+                    f"OFFLINE há {horas} hora(s)"
+                )
+
+            else:
+
+                inventario["status"] = (
+                    f"OFFLINE há {minutos} minuto(s)"
+                )
+
+        return inventario
 
     return {"erro": "Máquina não encontrada"}

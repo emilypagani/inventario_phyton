@@ -12,8 +12,7 @@ from datetime import datetime
 
 
 def pegar_data_coleta():
-    return datetime.now().strftime("%d/%m/%Y %H:%M")
-
+    return datetime.now().isoformat()
 
 def pegar_hostname():
     hostname = socket.gethostname()
@@ -152,17 +151,19 @@ def enviar_inventario(inventario):
     else:
         return False
 
-
 def gerar_html(
     data_coleta, hostname, usuario, ip, sistema, versao, cpu, gpu, ram_gb, lista_discos
 ):
+
+    data_formatada = datetime.fromisoformat(data_coleta).strftime("%d/%m/%Y %H:%M")
 
     cards_discos = ""
 
     for disco in lista_discos:
         cards_discos += f"""
         <div class="card">
-        <div class="titulo">💾 Disco {disco['unidade']}</div>
+            <div class="titulo">💾 Disco {disco['unidade']}</div>
+
             <p><strong>Total:</strong> {disco['tamanho']:.2f} GB</p>
             <p><strong>Usado:</strong> {disco['usado']:.2f} GB</p>
             <p><strong>Livre:</strong> {disco['livre']:.2f} GB</p>
@@ -195,6 +196,13 @@ def gerar_html(
             margin: auto;
         }}
 
+        .topo {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }}
+
         h1 {{
             color: #38bdf8;
             margin-bottom: 5px;
@@ -202,22 +210,56 @@ def gerar_html(
 
         .subtitulo {{
             color: #94a3b8;
-            margin-bottom: 30px;
+            margin-bottom: 8px;
         }}
-        
-        <p class="subtitulo">Coleta realizada em {data_coleta}</p>
 
-        button {{
+        .status-area {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e2e8f0;
+            margin-top: 8px;
+        }}
+
+        .status-bolinha {{
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #94a3b8;
+        }}
+
+        .online {{
+            background-color: #22c55e;
+        }}
+
+        .offline {{
+            background-color: #ef4444;
+        }}
+
+        .botao-atualizar {{
             background-color: #38bdf8;
             color: #0f172a;
             border: none;
-            padding: 10px 16px;
-            border-radius: 10px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             cursor: pointer;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 20px;
+            transition: 0.5s;
         }}
-        
+
+        .botao-atualizar:hover {{
+            background-color: #0ea5e9;
+            transform: rotate(180deg);
+        }}
+
+        #ultima-atualizacao {{
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }}
+
         .grid {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -260,65 +302,8 @@ def gerar_html(
             height: 100%;
             background-color: #38bdf8;
         }}
-        
-        button {{
-            background-color: #38bdf8;
-            color: #0f172a;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }}
-
-        button:hover {{
-            background-color: #0ea5e9;
-        }}
-
-        #ultima-atualizacao {{
-            color: #94a3b8;
-            font-size: 14px;
-        }}
-        
-        .topo {{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }}
-
-        .botao-atualizar {{
-            background-color: #38bdf8;
-            color: #0f172a;
-            border: none;
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: bold;
-            transition: 0.5s;
-        }}
-
-        .botao-atualizar:hover {{
-            background-color: #0ea5e9;
-            transform: rotate(180deg);
-        }}
     </style>
-
 </head>
-
-<script>
-    function atualizarPagina() {{
-        location.reload();
-    }}
-
-    const agora = new Date();
-
-    document.getElementById("ultima-atualizacao").innerText =
-        "Página carregada em: " + agora.toLocaleString("pt-BR");
-</script>
 
 <body>
 
@@ -326,24 +311,24 @@ def gerar_html(
 
         <div class="topo">
 
-    <div>
-        <h1>Inventário do Sistema</h1>
-        <p class="subtitulo">
-            Coleta realizada em {data_coleta}
-        </p>
-    </div>
+            <div>
+                <h1>Inventário do Sistema</h1>
 
-    <button
-        class="botao-atualizar"
-        onclick="atualizarPagina()">
+                <p class="subtitulo">
+                    Coleta realizada em {data_formatada}
+                </p>
 
-        ↻
+                <div class="status-area">
+                    <span id="status-bolinha" class="status-bolinha"></span>
+                    <span id="status-texto">Verificando status...</span>
+                </div>
+            </div>
 
-    </button>
+            <button class="botao-atualizar" onclick="atualizarPagina()">↻</button>
 
-</div>
+        </div>
 
-<p id="ultima-atualizacao"></p>
+        <p id="ultima-atualizacao"></p>
 
         <div class="grid">
 
@@ -374,13 +359,48 @@ def gerar_html(
 
     </div>
 
+    <script>
+        function atualizarPagina() {{
+            location.reload();
+        }}
+
+        async function carregarStatus() {{
+            const texto = document.getElementById("status-texto");
+            const bolinha = document.getElementById("status-bolinha");
+
+            try {{
+                const resposta = await fetch("http://127.0.0.1:8000/maquinas/{hostname}");
+                const dados = await resposta.json();
+
+                if (dados.status === "ONLINE") {{
+                    bolinha.classList.add("online");
+                    bolinha.classList.remove("offline");
+                    texto.innerText = "Online";
+                }} else {{
+                    bolinha.classList.add("offline");
+                    bolinha.classList.remove("online");
+                    texto.innerText = dados.status;
+                }}
+
+            }} catch (erro) {{
+                bolinha.classList.add("offline");
+                bolinha.classList.remove("online");
+                texto.innerText = "API offline";
+            }}
+        }}
+
+        const agora = new Date();
+
+        carregarStatus();
+        setInterval(carregarStatus, 30000);
+    </script>
+
 </body>
 
 </html>
 """
 
     return html
-
 
 def main():
     inventario = montar_inventario()
@@ -408,7 +428,7 @@ def main():
     with open("inventario.json", "w", encoding="utf-8") as arquivo_json:
         arquivo_json.write(json_inventario)
 
-    os.startfile("inventario.html")
+    #os.startfile("inventario.html")
 
     print("Diagnóstico de Configurações:\n")
     print(f"Data da coleta: {inventario['data_coleta']}\n")
@@ -436,11 +456,7 @@ def main():
 
 
 if __name__ == "__main__":
-    # while True:
-
-    #     main()
-
-    #     print("Aguardando próxima coleta...\n")
-
-    #     time.sleep(60)
-    main()
+ 
+    while True:
+        main()
+        time.sleep(30)
